@@ -49,3 +49,4 @@ app.get("/land", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`server running on ${PORT}`);
 });
+console.log("KEY:", process.env.VWORLD_KEY);
