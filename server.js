@@ -1,24 +1,54 @@
-const http = require("http");
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer((req, res) => {
-  if (req.url === "/") {
-    res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
-    res.end("land proxy running");
-    return;
-  }
-
-  if (req.url === "/land") {
-    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    res.end(JSON.stringify({ success: true }));
-    return;
-  }
-
-  res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-  res.end("not found");
+app.get("/", (req, res) => {
+  res.send("land proxy running");
 });
 
-server.listen(PORT, "0.0.0.0", () => {
+app.all("/land", async (req, res) => {
+  try {
+    const targetUrl = process.env.TARGET_URL;
+
+    if (!targetUrl) {
+      return res.status(500).json({
+        error: true,
+        message: "TARGET_URL not set"
+      });
+    }
+
+    const response = await axios({
+      method: req.method,
+      url: targetUrl,
+      params: req.query,
+      data: req.body,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      timeout: 30000
+    });
+
+    if (typeof response.data === "object") {
+      return res.status(response.status).json(response.data);
+    }
+
+    return res.status(response.status).send(response.data);
+  } catch (error) {
+    console.error("proxy error:", error.response?.data || error.message);
+
+    return res.status(error.response?.status || 500).json({
+      error: true,
+      message: error.response?.data || error.message
+    });
+  }
+});
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`server running on ${PORT}`);
 });
