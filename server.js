@@ -1,19 +1,24 @@
-const express = require("express");
-const cors = require("cors");
-
-const app = express();
-app.use(cors());
+const http = require("http");
 
 const PORT = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("land proxy running");
+const server = http.createServer((req, res) => {
+  if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("land proxy running");
+    return;
+  }
+
+  if (req.url === "/land") {
+    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ success: true }));
+    return;
+  }
+
+  res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+  res.end("not found");
 });
 
-app.get("/land", (req, res) => {
-  res.json({ success: true });
-});
-
-app.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`server running on ${PORT}`);
 });
