@@ -1,3 +1,4 @@
+console.log("DEPLOY CHECK 2026-03-26");
 const express = require("express");
 const axios = require("axios");
 
