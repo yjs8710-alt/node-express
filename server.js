@@ -15,6 +15,9 @@ app.get("/land", async (req, res) => {
     const targetUrl = process.env.TARGET_URL;
     const key = process.env.VWORLD_KEY;
 
+    console.log("TARGET_URL:", targetUrl);
+    console.log("VWORLD_KEY exists:", !!key);
+
     if (!targetUrl) {
       return res.status(500).json({
         error: true,
@@ -49,4 +52,3 @@ app.get("/land", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`server running on ${PORT}`);
 });
-console.log("KEY:", process.env.VWORLD_KEY);
