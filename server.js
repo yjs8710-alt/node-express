@@ -1,9 +1,7 @@
 const express = require("express");
-const cors = require("cors");
 const axios = require("axios");
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -12,36 +10,29 @@ app.get("/", (req, res) => {
   res.send("land proxy running");
 });
 
-app.all("/land", async (req, res) => {
+app.get("/land", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
+    const key = process.env.VWORLD_KEY;
 
     if (!targetUrl) {
-      return res.status(500).json({
-        error: true,
-        message: "TARGET_URL not set"
-      });
+      return res.status(500).json({ error: true, message: "TARGET_URL not set" });
     }
 
-    const response = await axios({
-      method: req.method,
-      url: targetUrl,
-      params: req.query,
-      data: req.body,
-      headers: {
-        "Content-Type": "application/json"
+    if (!key) {
+      return res.status(500).json({ error: true, message: "VWORLD_KEY not set" });
+    }
+
+    const response = await axios.get(targetUrl, {
+      params: {
+        key,
+        ...req.query
       },
       timeout: 30000
     });
 
-    if (typeof response.data === "object") {
-      return res.status(response.status).json(response.data);
-    }
-
-    return res.status(response.status).send(response.data);
+    return res.status(response.status).json(response.data);
   } catch (error) {
-    console.error("proxy error:", error.response?.data || error.message);
-
     return res.status(error.response?.status || 500).json({
       error: true,
       message: error.response?.data || error.message
