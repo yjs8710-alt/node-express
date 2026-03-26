@@ -23,7 +23,7 @@ app.get("/env-check", (req, res) => {
 app.get("/land", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
-    const key = process.env.VWORLD_KEY;
+    const key = process.env.VWORLDKEY;
 
     if (!targetUrl) {
       return res.status(500).json({ error: true, message: "TARGET_URL not set" });
