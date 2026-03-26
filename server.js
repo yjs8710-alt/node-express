@@ -6,21 +6,19 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// 확인용
 app.get("/", (req, res) => {
   res.send("FINAL_OK");
 });
 
-// 환경변수 확인
 app.get("/env-check", (req, res) => {
   res.json({
     hasTargetUrl: !!process.env.TARGET_URL,
-    hasVworldKey: !!process.env.VWORLD_KEY
+    hasVworldKey: !!process.env.VWORLD_KEY,
+    hasDataGoKrKey: !!process.env.DATA_GO_KR_API_KEY
   });
 });
 
-// 토지 조회
-app.get("/land", async (req, res) => {
+app.post("/land", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
     const key = process.env.VWORLD_KEY;
@@ -33,16 +31,21 @@ app.get("/land", async (req, res) => {
       return res.status(500).json({ error: true, message: "VWORLD_KEY not set" });
     }
 
+    console.log("LAND_ROUTE_HIT");
+    console.log("BODY:", req.body);
+
     const response = await axios.get(targetUrl, {
       params: {
-        key,
-        ...req.query
+        key: encodeURIComponent(key),
+        ...req.body
       }
     });
 
-    return res.json(response.data);
+    console.log("🌍 토지 응답:", response.data);
 
+    return res.json(response.data);
   } catch (err) {
+    console.error("LAND ERROR:", err.response?.data || err.message);
     return res.status(500).json({
       error: true,
       message: err.response?.data || err.message
