@@ -16,11 +16,17 @@ app.get("/land", async (req, res) => {
     const key = process.env.VWORLD_KEY;
 
     if (!targetUrl) {
-      return res.status(500).json({ error: true, message: "TARGET_URL not set" });
+      return res.status(500).json({
+        error: true,
+        message: "TARGET_URL not set"
+      });
     }
 
     if (!key) {
-      return res.status(500).json({ error: true, message: "VWORLD_KEY not set" });
+      return res.status(500).json({
+        error: true,
+        message: "VWORLD_KEY not set"
+      });
     }
 
     const response = await axios.get(targetUrl, {
