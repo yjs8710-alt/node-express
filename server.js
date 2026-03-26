@@ -10,13 +10,18 @@ app.get("/", (req, res) => {
   res.send("land proxy running");
 });
 
+app.get("/env-check", (req, res) => {
+  res.json({
+    hasTargetUrl: !!process.env.TARGET_URL,
+    hasVworldKey: !!process.env.VWORLD_KEY,
+    targetUrlPreview: process.env.TARGET_URL || null
+  });
+});
+
 app.get("/land", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
     const key = process.env.VWORLD_KEY;
-
-    console.log("TARGET_URL:", targetUrl);
-    console.log("VWORLD_KEY exists:", !!key);
 
     if (!targetUrl) {
       return res.status(500).json({
