@@ -281,3 +281,5 @@ app.post("/land", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log("SERVER RUNNING");
 });
+console.log("🔥 LAND START");
+console.log("🌍 토지 응답:", finalResult);
