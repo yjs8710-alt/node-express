@@ -31,7 +31,7 @@ app.get("/land", async (req, res) => {
       timeout: 30000
     });
 
-    return res.status(200).json(response.data);
+    return res.status(response.status).json(response.data);
   } catch (error) {
     return res.status(error.response?.status || 500).json({
       error: true,
