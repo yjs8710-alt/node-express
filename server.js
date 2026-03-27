@@ -8,11 +8,13 @@ const PORT = process.env.PORT || 3000;
 
 // 기본 확인
 app.get("/", (req, res) => {
+  console.log("=== / called ===");
   res.send("FINAL_OK");
 });
 
 // 환경변수 확인
 app.get("/env-check", (req, res) => {
+  console.log("=== /env-check called ===");
   res.json({
     hasTargetUrl: !!process.env.TARGET_URL,
     hasVworldKey: !!process.env.VWORLD_KEY,
@@ -20,23 +22,34 @@ app.get("/env-check", (req, res) => {
   });
 });
 
+// TARGET_URL 확인
+app.get("/target-check", (req, res) => {
+  console.log("=== /target-check called ===");
+  res.json({
+    targetUrl: process.env.TARGET_URL || null
+  });
+});
+
 // 토지 조회
 app.get("/land", async (req, res) => {
-  try {
-    console.log("=== /land called ===");
-    console.log("query:", req.query);
+  console.log("=== /land called ===");
+  console.log("method:", req.method);
+  console.log("url:", req.originalUrl);
+  console.log("query:", req.query);
 
+  try {
     const targetUrl = process.env.TARGET_URL;
     const vworldKey = process.env.VWORLD_KEY;
     const dataGoKrKey = process.env.DATA_GO_KR_KEY;
 
-    console.log("hasTargetUrl:", !!targetUrl);
-    console.log("hasVworldKey:", !!vworldKey);
-    console.log("hasDataGoKrKey:", !!dataGoKrKey);
+    console.log("TARGET_URL:", targetUrl);
+    console.log("VWORLD_KEY exists:", !!vworldKey);
+    console.log("DATA_GO_KR_KEY exists:", !!dataGoKrKey);
 
     if (!targetUrl) {
       return res.status(500).json({
         error: true,
+        step: "env-check",
         message: "TARGET_URL not set"
       });
     }
@@ -44,36 +57,50 @@ app.get("/land", async (req, res) => {
     if (!vworldKey) {
       return res.status(500).json({
         error: true,
+        step: "env-check",
         message: "VWORLD_KEY not set"
       });
     }
 
     const params = {
       ...req.query,
-      key: vworldKey,
-      serviceKey: dataGoKrKey
+      key: vworldKey
     };
 
-    console.log("targetUrl:", targetUrl);
-    console.log("request params:", params);
+    if (dataGoKrKey) {
+      params.serviceKey = dataGoKrKey;
+    }
+
+    console.log("external request start");
+    console.log("request targetUrl:", targetUrl);
+    console.log("request params:", JSON.stringify(params, null, 2));
 
     const response = await axios.get(targetUrl, {
       params,
       timeout: 15000
     });
 
-    console.log("external response received");
+    console.log("external response success");
 
-    res.json({
+    return res.json({
       ok: true,
-      requestedQuery: req.query,
-      response: response.data
+      step: "success",
+      requestQuery: req.query,
+      externalData: response.data
     });
   } catch (error) {
-    console.error("LAND ERROR:", error.response?.data || error.message);
+    console.log("external request failed");
 
-    res.status(500).json({
+    if (error.response) {
+      console.log("error status:", error.response.status);
+      console.log("error data:", error.response.data);
+    } else {
+      console.log("error message:", error.message);
+    }
+
+    return res.status(500).json({
       error: true,
+      step: "catch",
       message: error.response?.data || error.message
     });
   }
@@ -82,4 +109,3 @@ app.get("/land", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`SERVER RUNNING on ${PORT}`);
 });
-console.log("TARGET_URL:", targetUrl);
