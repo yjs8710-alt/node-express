@@ -1,12 +1,15 @@
 const express = require("express");
 const axios = require("axios");
+const cors = require("cors");
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// 확인용
+// 서버 동작 확인
 app.get("/", (req, res) => {
   res.send("FINAL_OK");
 });
@@ -24,6 +27,7 @@ app.get("/land", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
     const vworldKey = process.env.VWORLD_KEY;
+    const { pnu } = req.query;
 
     if (!targetUrl) {
       return res.status(500).json({
@@ -39,8 +43,6 @@ app.get("/land", async (req, res) => {
       });
     }
 
-    const { pnu } = req.query;
-
     if (!pnu) {
       return res.status(400).json({
         error: true,
@@ -50,13 +52,27 @@ app.get("/land", async (req, res) => {
 
     const url = `${targetUrl}?key=${encodeURIComponent(vworldKey)}&pnu=${encodeURIComponent(pnu)}`;
 
-    const response = await axios.get(url);
+    console.log("LAND_REQUEST_URL:", url);
+
+    const response = await axios.get(url, {
+      timeout: 15000
+    });
 
     res.json(response.data);
   } catch (error) {
+    console.error("LAND_ERROR:", error.message);
+
+    if (error.response) {
+      return res.status(error.response.status || 500).json({
+        error: true,
+        message: "External API error",
+        detail: error.response.data
+      });
+    }
+
     res.status(500).json({
       error: true,
-      message: error.message
+      message: error.message || "Unknown server error"
     });
   }
 });
