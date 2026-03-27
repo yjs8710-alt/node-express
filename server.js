@@ -82,3 +82,4 @@ app.get("/land", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`SERVER RUNNING on ${PORT}`);
 });
+console.log("TARGET_URL:", targetUrl);
