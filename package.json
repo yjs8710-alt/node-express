@@ -1,7 +1,6 @@
 {
   "name": "land-proxy-server",
   "version": "1.0.0",
-  "description": "Land proxy server for VWorld API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
