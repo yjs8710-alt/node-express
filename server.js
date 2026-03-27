@@ -1,3 +1,28 @@
+const express = require("express");
+const axios = require("axios");
+
+const app = express();
+app.use(express.json());
+
+const PORT = process.env.PORT || 3000;
+
+// 기본 확인
+app.get("/", (req, res) => {
+  console.log("=== / called ===");
+  res.send("FINAL_OK");
+});
+
+// 환경 확인
+app.get("/env-check", (req, res) => {
+  console.log("=== /env-check called ===");
+  res.json({
+    hasTargetUrl: !!process.env.TARGET_URL,
+    hasVworldKey: !!process.env.VWORLD_KEY,
+    hasDataGoKrKey: !!process.env.DATA_GO_KR_KEY
+  });
+});
+
+// 토지 조회 (최종 버전)
 app.get("/land", async (req, res) => {
   console.log("=== /land called ===");
 
@@ -30,7 +55,6 @@ app.get("/land", async (req, res) => {
       });
     }
 
-    // 🔥 핵심 수정 부분
     const response = await axios.get(targetUrl, {
       params: {
         pnu: pnu,
@@ -52,4 +76,8 @@ app.get("/land", async (req, res) => {
       message: error.response?.data || error.message
     });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`SERVER RUNNING on ${PORT}`);
 });
