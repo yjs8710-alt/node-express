@@ -57,9 +57,10 @@ app.get("/address-to-pnu", async (req, res) => {
       timeout: 20000
     });
 
-    const item = response.data?.response?.result?.items?.[0]
-      || response.data?.result?.items?.[0]
-      || null;
+    const item =
+      response.data?.response?.result?.items?.[0] ||
+      response.data?.result?.items?.[0] ||
+      null;
 
     if (!item) {
       return res.json({
@@ -87,7 +88,7 @@ app.get("/address-to-pnu", async (req, res) => {
   }
 });
 
-// 토지 조회
+// PNU -> 토지조회
 app.get("/land", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
@@ -134,7 +135,7 @@ app.get("/land", async (req, res) => {
   }
 });
 
-// 주소로 바로 토지 조회
+// 주소로 바로 토지조회
 app.get("/land-by-address", async (req, res) => {
   try {
     const targetUrl = process.env.TARGET_URL;
@@ -180,9 +181,10 @@ app.get("/land-by-address", async (req, res) => {
       timeout: 20000
     });
 
-    const item = pnuRes.data?.response?.result?.items?.[0]
-      || pnuRes.data?.result?.items?.[0]
-      || null;
+    const item =
+      pnuRes.data?.response?.result?.items?.[0] ||
+      pnuRes.data?.result?.items?.[0] ||
+      null;
 
     if (!item || !item.id) {
       return res.json({
@@ -195,7 +197,7 @@ app.get("/land-by-address", async (req, res) => {
 
     const pnu = item.id;
 
-    // 2. PNU -> 토지 조회
+    // 2. PNU -> 토지조회
     const landRes = await axios.get(targetUrl, {
       params: {
         pnu,
