@@ -207,6 +207,8 @@ app.get("/land-by-address", async (req, res) => {
       timeout: 20000
     });
 
+    const landRow = landRes.data?.ladfrlVOList?.ladfrlVOList?.[0] || null;
+
     return res.json({
       ok: true,
       address,
@@ -214,7 +216,21 @@ app.get("/land-by-address", async (req, res) => {
       parcelAddress: item.address?.parcel || "",
       roadAddress: item.address?.road || "",
       point: item.point || null,
-      land: landRes.data
+
+      // 원본 응답도 유지
+      land: landRes.data,
+
+      // 프론트에서 쓰기 쉽게 평탄화
+      landInfo: {
+        area: landRow?.lndpclAr || "",
+        category: landRow?.lndcgrCodeNm || "",
+        owner: landRow?.posesnSeCodeNm || "",
+        updateDate: landRow?.lastUpdtDt || "",
+        regstrType: landRow?.regstrSeCodeNm || "",
+        pnu: landRow?.pnu || pnu,
+        addressName: landRow?.ldCodeNm || "",
+        lotNumber: landRow?.mnnmSlno || ""
+      }
     });
   } catch (error) {
     return res.status(500).json({
