@@ -15,12 +15,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// 기본 확인
 app.get("/", (req, res) => {
   res.send("FINAL_OK");
 });
 
-// 환경 확인
 app.get("/env-check", (req, res) => {
   res.json({
     hasTargetUrl: !!process.env.TARGET_URL,
@@ -28,7 +26,6 @@ app.get("/env-check", (req, res) => {
   });
 });
 
-// 토지 조회
 app.get("/land", async (req, res) => {
   const { pnu } = req.query;
   const targetUrl = process.env.TARGET_URL;
@@ -46,7 +43,7 @@ app.get("/land", async (req, res) => {
 
     console.log("===== REQUEST =====");
     console.log("targetUrl =", targetUrl);
-    console.log("params =", params);
+    console.log("params =", JSON.stringify(params, null, 2));
 
     const response = await axios.get(targetUrl, {
       params,
@@ -56,7 +53,6 @@ app.get("/land", async (req, res) => {
 
     console.log("===== UPSTREAM STATUS =====");
     console.log(response.status);
-
     console.log("===== UPSTREAM DATA =====");
     console.log(
       typeof response.data === "string"
@@ -67,16 +63,24 @@ app.get("/land", async (req, res) => {
     return res.status(response.status).json({
       ok: response.status < 400,
       upstreamStatus: response.status,
-      data: response.data
+      upstreamData: response.data
     });
-
   } catch (error) {
     console.log("===== AXIOS ERROR =====");
-    console.log(error.message);
+    console.log("message =", error.message);
+    console.log("status =", error.response?.status || null);
+    console.log(
+      "data =",
+      typeof error.response?.data === "string"
+        ? error.response?.data
+        : JSON.stringify(error.response?.data || null, null, 2)
+    );
 
     return res.status(500).json({
       error: true,
-      message: error.message
+      message: error.message,
+      status: error.response?.status || null,
+      upstreamData: error.response?.data || null
     });
   }
 });
