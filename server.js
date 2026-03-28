@@ -1,31 +1,3 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
-
-const app = express();
-
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-app.options("*", cors());
-
-app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
-
-app.get("/", (req, res) => {
-  res.send("FINAL_OK");
-});
-
-app.get("/env-check", (req, res) => {
-  res.json({
-    hasTargetUrl: !!process.env.TARGET_URL,
-    hasVworldKey: !!process.env.VWORLD_KEY
-  });
-});
-
 app.get("/land", async (req, res) => {
   const { pnu } = req.query;
   const targetUrl = process.env.TARGET_URL;
@@ -38,7 +10,11 @@ app.get("/land", async (req, res) => {
   try {
     const params = {
       pnu,
-      key: vworldKey
+      key: vworldKey,
+      format: "json",
+      numOfRows: 10,
+      pageNo: 1,
+      domain: "jibda.co.kr"
     };
 
     console.log("===== REQUEST =====");
@@ -54,11 +30,7 @@ app.get("/land", async (req, res) => {
     console.log("===== UPSTREAM STATUS =====");
     console.log(response.status);
     console.log("===== UPSTREAM DATA =====");
-    console.log(
-      typeof response.data === "string"
-        ? response.data
-        : JSON.stringify(response.data, null, 2)
-    );
+    console.log(JSON.stringify(response.data, null, 2));
 
     return res.status(response.status).json({
       ok: response.status < 400,
@@ -71,9 +43,7 @@ app.get("/land", async (req, res) => {
     console.log("status =", error.response?.status || null);
     console.log(
       "data =",
-      typeof error.response?.data === "string"
-        ? error.response?.data
-        : JSON.stringify(error.response?.data || null, null, 2)
+      JSON.stringify(error.response?.data || null, null, 2)
     );
 
     return res.status(500).json({
@@ -83,8 +53,4 @@ app.get("/land", async (req, res) => {
       upstreamData: error.response?.data || null
     });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
