@@ -9,12 +9,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// 기본 확인
 app.get("/", (req, res) => {
   res.send("FINAL_OK");
 });
 
-// 환경 확인
 app.get("/env-check", (req, res) => {
   res.json({
     hasTargetUrl: !!process.env.TARGET_URL,
@@ -22,7 +20,6 @@ app.get("/env-check", (req, res) => {
   });
 });
 
-// 토지 조회
 app.get("/land", async (req, res) => {
   const { pnu } = req.query;
 
@@ -33,24 +30,40 @@ app.get("/land", async (req, res) => {
     });
   }
 
+  if (!process.env.TARGET_URL) {
+    return res.status(500).json({
+      error: true,
+      message: "TARGET_URL not set"
+    });
+  }
+
+  if (!process.env.VWORLD_KEY) {
+    return res.status(500).json({
+      error: true,
+      message: "VWORLD_KEY not set"
+    });
+  }
+
   try {
     const response = await axios.get(process.env.TARGET_URL, {
       params: {
         pnu,
         key: process.env.VWORLD_KEY,
         format: "json"
-      }
+      },
+      timeout: 20000
     });
 
     return res.json({
       ok: true,
-      data: response.data
+      upstreamStatus: response.status,
+      upstreamData: response.data
     });
-
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.response?.status || 500).json({
       error: true,
-      message: error.message
+      message: error.message,
+      upstreamData: error.response?.data || null
     });
   }
 });
